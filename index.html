@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Searchable Spreadsheet</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #1f2937;
+        }
+      /* Container for the form elements */
+/* Container for the form elements */
+#searchForm {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+/* Style for the search input */
+#searchInput {
+    flex-grow: 1;
+    padding: 6px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    height: 40px;
+}
+
+/* Style for the search column dropdown */
+#searchColumn {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    height: 40px;
+}
+
+/* Adjust the height of the Select2 dropdowns */
+.select2-container .select2-selection--multiple {
+    height: 40px !important;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    padding: 0 10px;
+    line-height: 24px; /* Match the height of the element */
+    display: flex;
+    align-items: center;
+    height: 100%; /* Ensure full height */
+    box-sizing: border-box;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    margin-top: 5px;
+    background-color: #f0f0f0;
+    border: 0px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+    font-size: 14px;
+    line-height: normal;
+    color: #333;
+}
+
+/* Placeholder styling */
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+    color: #fbfbfb;
+    opacity: 1;
+    height: 20px; /* Match the height of the element */
+    box-sizing: border-box;
+    line-height: 20px;
+    padding-left: 10px; /* Adjust padding for alignment */
+}
+
+/* Adjust the height and padding of the dropdown items */
+.select2-container--default .select2-results>.select2-results__options {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.select2-container--default .select2-results__option {
+    padding: 10px 10px;
+}
+
+/* Ensure the dropdown does not overlap */
+.select2-dropdown {
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #6CB0D3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #6CB0D3;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table thead th {
+            background-color: #6CB0D3;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f0f0f0;
+            cursor: pointer;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 8px 16px;
+            font-size: 16px;
+            color: #6CB0D3;
+            background-color: white;
+            border: 1px solid #6CB0D3;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .pagination button:hover {
+            background-color: #6CB0D3;
+            color: white;
+        }
+        .pagination button.active {
+            background-color: #6CB0D3;
+            color: white;
+            border-color: #6CB0D3;
+        }
+        .pagination button.disabled {
+            background-color: #f0f0f0;
+            color: #ccc;
+            border-color: #ddd;
+            cursor: not-allowed;
+        }
+        .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 28px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 860px;
+    border-radius: 12px;
+    max-height: 70vh;
+    top: -40px;
+    overflow-y: auto;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#modalContent {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-header {
+    display: flex;
+    gap: 20px;
+}
+
+.modal-image {
+    flex: 1;
+    max-width: 20%;
+}
+
+.modal-details {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.modal-img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.modal-button {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: #6CB0D3;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.modal-button:hover {
+    background-color: #5a9bb8;
+}
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <h1>Searchable PBS item codes</h1>
+        <form id="searchForm">
+            <input type="text" id="searchInput" placeholder="Enter search term...">
+            <select id="searchColumn">
+                <option value="all">All Columns</option>
+                <option value="0">Item Code</option>
+                <option value="2">Condition</option>
+                <option value="3">Brand Name</option>
+                <option value="5">Formulation</option>
+                <option value="6">Streamlined</option>
+            </select>
+            <select id="filterCondition" multiple="multiple" style="width: 200px;">
+                <!-- Options will be dynamically populated -->
+            </select>
+            <select id="filterBrandName" multiple="multiple" style="width: 200px;">
+                <!-- Options will be dynamically populated -->
+            </select>
+            <select id="filterStreamlined" multiple="multiple" style="width: 200px;">
+                <!-- Options will be dynamically populated -->
+            </select>
+            <button type="submit">Search</button>
+        </form>
+        <div id="results"></div>
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalContent">
+                <!-- Content will be dynamically generated and inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script>
+        let allData = [];
+        let filteredData = [];
+        const itemsPerPage = 20;
+        let currentPage = 1;
+        const pagesToShow = 10;
+        let startPage = 1;
+
+       // Function to load the CSV data
+// Function to load the CSV data
+function loadCSVData() {
+    Papa.parse('your_data.csv', {
+        download: true,
+        header: true,
+        complete: function(results) {
+            allData = results.data;
+            filteredData = allData;
+            currentPage = 1;
+            displayResults(filteredData);
+            setupPagination();
+            initializeFilters();  // Initialize filters after data is loaded
+        }
+    });
+}
+
+// Function to initialize the filters
+function initializeFilters() {
+    $('#filterCondition').select2({
+        placeholder: "Select Condition",
+        allowClear: true,
+        width: 'resolve'
+    });
+    $('#filterBrandName').select2({
+        placeholder: "Select Brand Name",
+        allowClear: true,
+        width: 'resolve'
+    });
+    $('#filterStreamlined').select2({
+        placeholder: "Select Streamlined",
+        allowClear: true,
+        width: 'resolve'
+    });
+
+    const conditionOptions = [...new Set(allData.map(item => item['condition']))];
+    const brandNameOptions = [...new Set(allData.map(item => item['brand-name']))];
+    const streamlinedOptions = [...new Set(allData.map(item => item['streamlined']))];
+
+    conditionOptions.forEach(option => {
+        $('#filterCondition').append(new Option(option, option));
+    });
+    brandNameOptions.forEach(option => {
+        $('#filterBrandName').append(new Option(option, option));
+    });
+    streamlinedOptions.forEach(option => {
+        $('#filterStreamlined').append(new Option(option, option));
+    });
+}
+
+
+// Function to display results in the table
+function displayResults(results) {
+    const resultsDiv = document.getElementById('results');
+    if (results.length === 0) {
+        resultsDiv.innerHTML = '<p>No results found.</p>';
+        return;
+    }
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageResults = results.slice(startIndex, endIndex);
+
+    let tableHtml = '<table><thead><tr>';
+    const visibleColumns = ['item-code', 'condition', 'brand-name', 'formulation', 'streamlined'];
+    visibleColumns.forEach(column => {
+        tableHtml += `<th>${column}</th>`;
+    });
+    tableHtml += '</tr></thead><tbody>';
+
+    pageResults.forEach(row => {
+        tableHtml += '<tr>';
+        visibleColumns.forEach(column => {
+            tableHtml += `<td>${row[column]}</td>`;
+        });
+        tableHtml += '</tr>';
+    });
+
+    tableHtml += '</tbody></table>';
+    resultsDiv.innerHTML = tableHtml;
+
+    // Add click event to rows
+    const rows = resultsDiv.getElementsByTagName('tr');
+    for (let i = 1; i < rows.length; i++) {
+        rows[i].addEventListener('click', function() {
+            showModal(pageResults[i - 1]);
+        });
+    }
+}
+
+// Function to set up pagination
+function setupPagination() {
+    const paginationDiv = document.getElementById('pagination');
+    const pageCount = Math.ceil(filteredData.length / itemsPerPage);
+
+    let paginationHtml = '';
+    if (startPage > 1) {
+        paginationHtml += `<button onclick="prevPageSet()" class="pagination-arrow">«</button>`;
+    }
+
+    for (let i = startPage; i < startPage + pagesToShow && i <= pageCount; i++) {
+        const activeClass = i === currentPage ? 'active' : '';
+        paginationHtml += `<button onclick="changePage(${i})" class="${activeClass}">${i}</button>`;
+    }
+
+    if (startPage + pagesToShow <= pageCount) {
+        paginationHtml += `<button onclick="nextPageSet()" class="pagination-arrow">»</button>`;
+    }
+
+    paginationDiv.innerHTML = paginationHtml;
+}
+
+// Function to change page
+function changePage(page) {
+    currentPage = page;
+    displayResults(filteredData);
+}
+
+// Function to move to previous set of pages
+function prevPageSet() {
+    if (startPage > 1) {
+        startPage -= pagesToShow;
+        setupPagination();
+    }
+}
+
+// Function to move to next set of pages
+function nextPageSet() {
+    const pageCount = Math.ceil(filteredData.length / itemsPerPage);
+    if (startPage + pagesToShow <= pageCount) {
+        startPage += pagesToShow;
+        setupPagination();
+    }
+}
+// Function to perform the search
+function performSearch(searchTerm, columnIndex) {
+    const filterCondition = $('#filterCondition').val();
+    const filterBrandName = $('#filterBrandName').val();
+    const filterStreamlined = $('#filterStreamlined').val();
+
+    filteredData = allData.filter(row => {
+        let matchesSearchTerm = true;
+        if (columnIndex === 'all') {
+            matchesSearchTerm = Object.values(row).some(value =>
+                value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        } else {
+            const columnName = Object.keys(allData[0])[columnIndex];
+            matchesSearchTerm = row[columnName].toString().toLowerCase().includes(searchTerm.toLowerCase());
+        }
+
+        let matchesFilterCondition = !filterCondition.length || filterCondition.includes(row['condition']);
+        let matchesFilterBrandName = !filterBrandName.length || filterBrandName.includes(row['brand-name']);
+        let matchesFilterStreamlined = !filterStreamlined.length || filterStreamlined.includes(row['streamlined']);
+
+        return matchesSearchTerm && matchesFilterCondition && matchesFilterBrandName && matchesFilterStreamlined;
+    });
+
+    currentPage = 1;
+    startPage = 1;
+    displayResults(filteredData);
+    setupPagination();
+}
+
+// Function to show modal
+// Function to show modal
+function showModal(rowData) {
+    const modal = document.getElementById('myModal');
+    const modalContent = document.getElementById('modalContent');
+
+    // Section 1
+    let section1Html = `
+        <div style="display: flex; gap: 20px;">
+            <div style="flex: 0 0 20%;">
+                <img src="${rowData['logo']}" alt="Logo" style="max-width: 100%; height: auto;">
+            </div>
+            <div style="flex: 1;">
+                <p><strong>Item Code:</strong> ${rowData['item-code']}</p>
+                <p><strong>Brand Name:</strong> ${rowData['brand-name']}</p>
+                <p><strong>Formulation:</strong> ${rowData['formulation']}</p>
+                <p><strong>Condition:</strong> ${rowData['condition']}</p>
+                <p><strong>Streamlined:</strong> ${rowData['streamlined']}</p>
+                <p><strong>Manufacturer:</strong> ${rowData['manufacturer']}</p>
+                <p><strong>Biosimilar:</strong> ${rowData['biosimilar']}</p>
+                <p><strong>Forms:</strong> ${rowData['forms']}</p>
+                <div style="display: flex; gap: 10px;">
+                    <a href="${rowData['cmi_url']}" target="_blank" class="modal-button">CMI</a>
+                    <a href="${rowData['pi_url']}" target="_blank" class="modal-button">PI</a>
+                    <a href="${rowData['pbs_url']}" target="_blank" class="modal-button">PBS</a>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Section 2
+    let section2Html = `
+        <div>
+            ${rowData['Formatted_HTML']}
+        </div>
+    `;
+
+    modalContent.innerHTML = section1Html + section2Html;
+    modal.style.display = 'block';
+}
+
+// Add event listener to the form
+document.getElementById('searchForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const searchTerm = document.getElementById('searchInput').value;
+    const columnIndex = document.getElementById('searchColumn').value;
+    performSearch(searchTerm, columnIndex);
+});
+
+// Event listener for closing the modal
+document.getElementsByClassName('close')[0].onclick = function() {
+    document.getElementById('myModal').style.display = 'none';
+}
+
+// Close the modal when clicking outside of it
+window.onclick = function(event) {
+    const modal = document.getElementById('myModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Load the CSV data when the page loads
+window.onload = loadCSVData;
+    </script>
+     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+</body>
+</html>
